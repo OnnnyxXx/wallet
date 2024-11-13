@@ -5,15 +5,11 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-COPY entrypoint.sh .
+COPY wait-for-it.sh /app/
+RUN chmod +x /app/wait-for-it.sh
 
-RUN chmod +x entrypoint.sh
-
-ENTRYPOINT ["entrypoint.sh"]
-
-CMD ["gunicorn", "main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]
+CMD ["sh", "-c", "alembic upgrade head && gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"]

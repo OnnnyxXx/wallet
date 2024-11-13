@@ -52,11 +52,18 @@ async def perform_operation(uuid: str, operation: Operation, db: AsyncSession = 
     :return:
         uuid and balance or Insufficient funds or wallet not found
     """
+    try:
+        wallet = await update_wallet(db, uuid, operation)
 
-    wallet = await update_wallet(db, uuid, operation)
-    if not wallet:
-        raise HTTPException(status_code=400, detail="Insufficient funds or wallet not found")
-    return {"uuid": wallet.uuid, "balance": wallet.balance}
+        if wallet is None:
+            raise HTTPException(status_code=404, detail="Wallet not found")
+        elif isinstance(wallet, str):
+            raise HTTPException(status_code=400, detail=wallet)
+
+        return {"uuid": wallet.uuid, "balance": wallet.balance}
+
+    except Exception as er:
+        raise HTTPException(status_code=500, detail=str(er))
 
 
 @router.get('/api/v1/wallets/{uuid}')
@@ -71,7 +78,10 @@ async def get_balance(uuid: str, db: AsyncSession = Depends(get_db)):
     :return:
         uuid and balance or Wallet not found
     """
-    wallet = await get_wallet(db, uuid)
-    if not wallet:
-        raise HTTPException(status_code=400, detail="Wallet not found")
-    return {"uuid": wallet.uuid, "balance": wallet.balance}
+    try:
+        wallet = await get_wallet(db, uuid)
+        if not wallet:
+            raise HTTPException(status_code=400, detail="Wallet not found")
+        return {"uuid": wallet.uuid, "balance": wallet.balance}
+    except Exception as er:
+        raise HTTPException(status_code=500, detail=str(er))

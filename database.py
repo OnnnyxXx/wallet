@@ -6,7 +6,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-DATABASE_URL = "postgresql+asyncpg://postgres_user:postgres_password@localhost:5432/postgres_db"
+DATABASE_URL = "postgresql+asyncpg://postgres_user:postgres_password@db:5432/postgres_db"
 
 Base = declarative_base()
 
